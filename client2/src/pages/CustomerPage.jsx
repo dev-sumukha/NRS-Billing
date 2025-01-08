@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { PlusCircle, Edit, Trash2, ReceiptText } from "lucide-react";
 import axios from "axios";
 import userContext from "../store/UserContext";
+import { Link } from "react-router-dom";
 
 function CustomerPage() {
   const [customers, setCustomers] = useState([]);
@@ -41,8 +42,6 @@ function CustomerPage() {
         }
       );
 
-      console.log("API Response:", res.data); // Debug API response
-
       setNewCustomer({
         customerName: "",
         shopName: "",
@@ -53,10 +52,9 @@ function CustomerPage() {
         vouchers: [],
       });
       setShowModal(false);
-      setCustomers((prevCustomers) => [...prevCustomers, res.data.customer]); // Adjust based on your API response structure
+      setCustomers((prevCustomers) => [...prevCustomers, res.data.customer]);
       alert("Customer created successfully!");
     } catch (error) {
-      console.error("Error creating customer:", error.message);
       setError("Failed to create customer. Please try again.");
     } finally {
       setLoading(false);
@@ -70,17 +68,17 @@ function CustomerPage() {
 
   const handleDelete = async (customerId) => {
     try {
-      const res = await axios.delete(`http://localhost:3000/api/customer/deleteCustomer/${customerId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      await axios.delete(
+        `http://localhost:3000/api/customer/deleteCustomer/${customerId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setCustomers(customers.filter((c) => c._id !== customerId));
-      console.log(res);
-      console.log("customer deleted");
+      alert("Customer deleted successfully!");
     } catch (error) {
-      console.error("Error deleting customer:", error.message);
       alert("Failed to delete customer. Please try again.");
     }
   };
@@ -88,14 +86,16 @@ function CustomerPage() {
   const getCustomers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:3000/api/customer/getCustomers", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await axios.get(
+        "http://localhost:3000/api/customer/getCustomers",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setCustomers(res.data.customerList);
     } catch (error) {
-      console.error("Error fetching customers:", error.message);
       setError("Failed to fetch customers. Please reload.");
     } finally {
       setLoading(false);
@@ -120,12 +120,14 @@ function CustomerPage() {
       </div>
 
       {error && (
-        <div className="mb-4 text-red-500 bg-red-100 p-3 rounded-md">{error}</div>
+        <div className="mb-4 text-red-500 bg-red-100 p-3 rounded-md">
+          {error}
+        </div>
       )}
 
       {/* Customer List */}
       {loading ? (
-        <p>Loading customers...</p>
+        <div>Loading customers...</div>
       ) : (
         <div className="bg-white p-4 shadow-md rounded-lg">
           <table className="w-full text-sm text-left text-gray-500">
@@ -140,33 +142,46 @@ function CustomerPage() {
               </tr>
             </thead>
             <tbody>
-              {customers.length == 0 ? <p className="font-medium text-center mt-4 text-black">No customers to display 🤧</p> : customers.map((customer) => (
-                <tr key={customer._id} className="border-b hover:bg-gray-100">
-                  <td className="px-6 py-4">{customer.customerName}</td>
-                  <td className="px-6 py-4">{customer.shopName}</td>
-                  <td className="px-6 py-4">{customer.GSTNumber}</td>
-                  <td className="px-6 py-4">{customer.amountBalance}</td>
-                  <td className="px-6 py-4">{customer.amountPaid}</td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleEdit(customer._id)}
-                      className="mr-2 text-blue-500 hover:text-blue-700 transition-colors"
-                    >
-                      <Edit className="inline-block" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(customer._id)}
-                      className="text-red-500 hover:text-red-700 transition-colors"
-                      title="Delete Customer"
-                    >
-                      <Trash2 className="inline-block" />
-                    </button>
-                    <button>
-                      <ReceiptText className="inline-block" />
-                    </button>
+              {customers.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-4">
+                    No customers to display 🤧
                   </td>
                 </tr>
-              ))}
+              ) : (
+                customers.map((customer) => (
+                  <tr key={customer._id} className="border-b hover:bg-gray-100">
+                    <td className="px-6 py-4">{customer.customerName}</td>
+                    <td className="px-6 py-4">{customer.shopName}</td>
+                    <td className="px-6 py-4">{customer.GSTNumber}</td>
+                    <td className="px-6 py-4">{customer.amountBalance}</td>
+                    <td className="px-6 py-4">{customer.amountPaid}</td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => handleEdit(customer._id)}
+                        className="mr-2 text-blue-500 hover:text-blue-700 transition-colors"
+                      >
+                        <Edit className="inline-block" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(customer._id)}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                        title="Delete Customer"
+                      >
+                        <Trash2 className="inline-block" />
+                      </button>
+                      <Link to="/dashboard/customers/voucher/getVouchers/:customerId">
+                        <span
+                          className="text-gray-500 hover:text-gray-700 transition-colors"
+                          title="Delete Customer"
+                        >
+                          <ReceiptText className="inline-block" />
+                        </span>
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -196,7 +211,6 @@ function CustomerPage() {
                   required
                 />
               </div>
-
               <div className="mb-4">
                 <label
                   htmlFor="shopName"
@@ -215,7 +229,6 @@ function CustomerPage() {
                   required
                 />
               </div>
-
               <div className="mb-4">
                 <label
                   htmlFor="GSTNumber"
@@ -229,11 +242,11 @@ function CustomerPage() {
                   name="GSTNumber"
                   value={newCustomer.GSTNumber}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md uppercase"
                   placeholder="Enter GST Number"
+                  autoCapitalize="characters"
                 />
               </div>
-
               <div className="mb-4">
                 <label
                   htmlFor="place"
@@ -251,7 +264,6 @@ function CustomerPage() {
                   placeholder="Enter place"
                 />
               </div>
-
               <div className="flex justify-between">
                 <button
                   type="submit"
@@ -263,7 +275,7 @@ function CustomerPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
                 >
                   Cancel
                 </button>

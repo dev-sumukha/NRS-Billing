@@ -12,7 +12,7 @@ const customerSchema = new mongoose.Schema(
         },
         GSTNumber:{
             type: String,
-            default: "-"
+            default: "-",
         },
         amountBalance: {
             type: Number,
