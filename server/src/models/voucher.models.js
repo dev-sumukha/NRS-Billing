@@ -1,7 +1,14 @@
 import mongoose from "mongoose";
 
 const voucherSchema = new mongoose.Schema(
-    {
+    {   
+
+        serialNumber:{
+            type: Number,
+        },
+        date:{
+            type: Date,
+        },        
         customer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Customer",

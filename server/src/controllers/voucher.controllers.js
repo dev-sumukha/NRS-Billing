@@ -2,38 +2,46 @@ import { Voucher } from "../models/voucher.models.js";
 import { Customer } from "../models/customers.models.js";
 import { Item } from "../models/items.models.js";
  
-export const createVoucher = async (req,res) => {
+export const createVoucher = async (req, res) => {
     const { customerId } = req.params;
 
     try {
-        const customer = await Customer.findById({_id:customerId});
-
-        if(!customer){
-            return res.status(404).json({status: false, message: "Customer not found"});
+        const customer = await Customer.findById(customerId);
+  
+        if (!customer) {
+            return res.status(404).json({ status: false, message: "Customer not found" });
         }
 
-        const voucher = await Voucher.create({customer: customerId, items:[]});
+        const voucher = new Voucher({ customer: customerId, items: [] });
 
-        // adding voucher to the customer schema
+        voucher.serialNumber = customer.vouchers.length + 1;
+
+        await voucher.save();
+
         customer.vouchers.push(voucher._id);
         await customer.save();
-        
-        res.status(201).json({success: true, message: "Draft voucher created successfully", voucher});
+
+        console.log("Voucher serial number:", voucher.serialNumber);
+
+        res.status(201).json({ success: true, message: "Draft voucher created successfully", voucher });
     } catch (error) {
-        console.log("Error ",error);
+        console.error("Error:", error);
+        res.status(500).json({ status: false, message: "Internal server error" });
     }
-}
+};
+
 
 export const getVouchers = async(req,res) =>{
     // get the customer id
     // then fetch from populate function
     try {
         const { customerId } = req.params;
+        // customerName: customer.customerName, shopName: customer.shopName, GSTNumber: customer.GSTNumber
+        const customerDetails = await Customer.findById({_id:customerId}).select("customerName shopName GSTNumber place");
         
         const customerVoucherList = await Customer.findById({_id:customerId}).select("vouchers").populate("vouchers");
-        console.log(customerVoucherList);
 
-        res.status(200).json({success: true, message: "Voucher List", customerVoucherList});
+        res.status(200).json({success: true, message: "Voucher List", customerVoucherList,customerDetails});
     } catch (error) {
         console.log("Error ",error);
     }

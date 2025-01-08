@@ -23,7 +23,8 @@ const customerSchema = new mongoose.Schema(
             default: 0
         },
         place:{
-            type: String
+            type: String,
+            default: "-"
         },
         vouchers: [
             {
