@@ -49,6 +49,23 @@ export const deleteItem = async (req, res) => {
     }
 }
 
+export const suggestItemsToVoucher = async (req, res) => {
+    const { query } = req.query; // Ensure frontend sends query in the body
+    console.log("Query received:", req.query);
+    try {
+        const itemList = await Item.find({
+            itemName: { $regex: "^" + query, $options: "i" },
+        }).select("itemName rate caseQuantity company");
+        
+        console.log("Item List:", itemList);
+        res.status(200).json({ success: true, message: "Items List", itemList });
+    } catch (error) {
+        console.error("Error fetching items:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+
 // export const addItemsToVoucher = async (req, res) => {
 //     try {
 //         const { customerId, voucherId } = req.params;

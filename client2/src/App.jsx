@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import ProtectedRoute from "./ProtectedRoute";
 import Logout from "./pages/Logout";
 import CustomerVouchers from "./pages/CustomerVouchers";
+import VoucherPage from "./pages/VoucherPage"
 
 function App() {
   return (
@@ -41,6 +42,16 @@ function App() {
               </ProtectedRoute>
             }
           ></Route>
+          <Route 
+            path="/dashboard/customers/:customerId/vouchers/:voucherId/addItems"
+            element={
+              <ProtectedRoute>
+                <VoucherPage />
+              </ProtectedRoute>
+            }
+          >
+
+          </Route>
           <Route
             path="/dashboard/items"
             element={

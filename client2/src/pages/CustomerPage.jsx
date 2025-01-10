@@ -172,9 +172,6 @@ function CustomerPage() {
                       </button>
                       <Link
                         to={`/dashboard/customers/voucher/getVouchers/${customer._id}`}
-                        onClick={() =>
-                          console.log("Customer ID:", customer._id)
-                        }
                       >
                         <span
                           className="text-gray-500 hover:text-gray-700 transition-colors"
