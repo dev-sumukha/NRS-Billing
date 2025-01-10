@@ -18,25 +18,18 @@ function VoucherPage() {
   ]);
   const [total, setTotal] = useState(0);
   const [suggestions, setSuggestions] = useState([]);
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [activeRow, setActiveRow] = useState(0); // Track the currently active row
+  const [highlightedIndex, setHighlightedIndex] = useState(-1); // Track highlighted suggestion index
 
   // Handle Input Change for Items and Calculations
   const handleInputChange = async (index, field, value) => {
-    setActiveRow(index); // Update the active row
-
     const updatedRows = [...rows];
     updatedRows[index][field] = field === "qty" || field === "rate" ? +value : value;
 
-    // Fetch item suggestions only for the active row and for the "itemName" field
-    if (field === "itemName" && value.length > 2 && index === activeRow) {
+    // Fetch item suggestions based on the input value
+    if (field === "itemName" && value.length > 2) {
       fetchSuggestions(value);
     } else {
-      // Only clear suggestions if input is less than or equal to 2 characters
-      // and the user is not navigating through suggestions
-      if (highlightedIndex === -1) {
-        setSuggestions([]);
-      }
+      setSuggestions([]); // Clear suggestions if input is less than or equal to 2 characters
     }
 
     // Calculate Amount for the Row
@@ -45,6 +38,7 @@ function VoucherPage() {
     }
 
     setRows(updatedRows);
+    setHighlightedIndex(-1); // Reset highlighted index when input changes
   };
 
   const fetchSuggestions = debounce(async (query) => {
@@ -53,10 +47,9 @@ function VoucherPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSuggestions(res.data.itemList);
-      // Reset highlighted index when new suggestions are fetched
-      setHighlightedIndex(-1);
+      setHighlightedIndex(-1); // Reset highlighted index when new suggestions are fetched
     } catch (error) {
-      console.error("Error fetching suggestions:", error);
+      console.log("Error fetching suggestions:", error);
     }
   }, 500);
 
@@ -139,7 +132,7 @@ function VoucherPage() {
         </thead>
         <tbody>
           {rows.map((row, index) => (
-            <tr key={row.id}>
+            <tr key={index}>
               <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
               <td className="border border-gray-300 px-4 py-2 relative">
                 <input
@@ -151,7 +144,7 @@ function VoucherPage() {
                   placeholder="Type item name"
                 />
                 {/* Dropdown for item suggestions */}
-                {suggestions.length > 0 && index === activeRow && (
+                {suggestions.length > 0 && (
                   <ul className="absolute bg-white border border-gray-300 rounded shadow-md w-full z-10">
                     {suggestions.map((suggestion, i) => (
                       <li
