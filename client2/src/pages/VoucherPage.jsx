@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom"; // Import useParams hook
 import userContext from "../store/UserContext";
 
 const debounce = (fn, delay) => {
@@ -12,6 +13,8 @@ const debounce = (fn, delay) => {
 
 function VoucherPage() {
   const { token } = useContext(userContext);
+  // Get customerId and voucherId from URL parameters
+  const { customerId, voucherId } = useParams();
 
   const [rows, setRows] = useState([
     { id: Date.now(), itemName: "", companyName: "", qty: 0, rate: 0, amount: 0 },
@@ -53,21 +56,18 @@ function VoucherPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSuggestions(res.data.itemList);
-      // Reset highlighted index when new suggestions are fetched
       setHighlightedIndex(-1);
     } catch (error) {
       console.error("Error fetching suggestions:", error);
     }
   }, 500);
 
-  // Handle Enter Key to Add Row or Select Suggestion
   const handleKeyDown = (index, event) => {
     if (event.key === "Enter" && index === rows.length - 1) {
-      event.preventDefault(); // Prevent default behavior
-      addRow(); // Add a new row
+      event.preventDefault();
+      addRow();
     }
 
-    // Handle arrow keys for navigating suggestions
     if (event.key === "ArrowDown") {
       event.preventDefault();
       if (highlightedIndex < suggestions.length - 1) {
@@ -79,13 +79,11 @@ function VoucherPage() {
         setHighlightedIndex((prevIndex) => prevIndex - 1);
       }
     } else if (event.key === "Enter" && highlightedIndex >= 0) {
-      // Select highlighted suggestion
       handleItemSelect(index, suggestions[highlightedIndex]);
-      setHighlightedIndex(-1); // Reset highlighted index after selection
+      setHighlightedIndex(-1);
     }
   };
 
-  // Add a New Row
   const addRow = () => {
     setRows([
       ...rows,
@@ -93,7 +91,6 @@ function VoucherPage() {
     ]);
   };
 
-  // Remove a Row
   const removeRow = (index) => {
     const updatedRows = rows.filter((_, i) => i !== index);
     setRows(updatedRows);
@@ -111,8 +108,8 @@ function VoucherPage() {
     };
 
     setRows(updatedRows);
-    setSuggestions([]); // Clear suggestions after selection
-    setHighlightedIndex(-1); // Reset highlighted index after selection
+    setSuggestions([]);
+    setHighlightedIndex(-1);
   };
 
   useEffect(() => {
@@ -120,11 +117,33 @@ function VoucherPage() {
     setTotal(newTotal);
   }, [rows]);
 
+  const saveAsDraft = async () => {
+    try {
+      const payload = { items: rows, total }; // Prepare the data to send
+      // const res = await axios.patch(
+      //   `http://localhost:3000/api/items/customers/${customerId}/vouchers/${voucherId}/addItems`,
+      //   payload,
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`, // Pass token for authorization
+      //     },
+      //   }
+      // );
+      // console.log(res);
+
+      console.log(payload);
+    } catch (error) {
+      console.error("Error saving draft data:", error);
+      alert("Error saving draft data.");
+    }
+  };
+  
+
   return (
     <div className="container mx-auto p-8">
       <h1 className="text-3xl font-semibold mb-4">Add Items</h1>
-
-      {/* Items Table */}
+      <p className="text-2xl font-bold">Customer ID: {customerId}</p>
+      <p className="text-2xl font-bold">Voucher ID: {voucherId}</p>
       <table className="min-w-full border-collapse border border-gray-300 shadow-md rounded-lg mt-6">
         <thead className="bg-gray-200">
           <tr>
@@ -150,14 +169,15 @@ function VoucherPage() {
                   className="w-full border border-gray-300 px-2 py-1 rounded"
                   placeholder="Type item name"
                 />
-                {/* Dropdown for item suggestions */}
                 {suggestions.length > 0 && index === activeRow && (
                   <ul className="absolute bg-white border border-gray-300 rounded shadow-md w-full z-10">
                     {suggestions.map((suggestion, i) => (
                       <li
                         key={i}
                         onClick={() => handleItemSelect(index, suggestion)}
-                        className={`cursor-pointer px-2 py-1 hover:bg-gray-200 ${highlightedIndex === i ? 'bg-gray-200' : ''}`}
+                        className={`cursor-pointer px-2 py-1 hover:bg-gray-200 ${
+                          highlightedIndex === i ? "bg-gray-200" : ""
+                        }`}
                       >
                         {suggestion.itemName}
                       </li>
@@ -171,7 +191,6 @@ function VoucherPage() {
                   type="number"
                   value={row.qty}
                   onChange={(e) => handleInputChange(index, "qty", e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
                   className="w-full border border-gray-300 px-2 py-1 rounded"
                 />
               </td>
@@ -180,7 +199,6 @@ function VoucherPage() {
                   type="number"
                   value={row.rate}
                   onChange={(e) => handleInputChange(index, "rate", e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
                   className="w-full border border-gray-300 px-2 py-1 rounded"
                 />
               </td>
@@ -200,15 +218,17 @@ function VoucherPage() {
         </tbody>
         <tfoot>
           <tr>
-            <td colSpan="5" className="text-right font-semibold px-4 py-2 border-t">
-              Total
-            </td>
-            <td colSpan="2" className="text-left font-semibold px-4 py-2 border-t">
-              {total.toFixed(2)}
-            </td>
+            <td colSpan="5" className="text-right font-semibold px-4 py-2 border-t">Total</td>
+            <td colSpan="2" className="text-left font-semibold px-4 py-2 border-t">{total.toFixed(2)}</td>
           </tr>
         </tfoot>
       </table>
+      <button
+        onClick={saveAsDraft}
+        className="mt-4 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+      >
+        Save as Draft
+      </button>
     </div>
   );
 }

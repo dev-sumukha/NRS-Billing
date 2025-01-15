@@ -10,5 +10,5 @@ router.delete("/deleteItem/:id",authMiddleware,deleteItem);
 router.get("/suggestItems",suggestItemsToVoucher);
 
 // add items for a particular voucher of a particular customer
-router.put("/customers/:customerId/vouchers/:voucherId/addItems",addItemsToVoucher);
+router.patch("/customers/:customerId/vouchers/:voucherId/addItems",authMiddleware,addItemsToVoucher);
 export default router;

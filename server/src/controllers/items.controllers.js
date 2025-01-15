@@ -96,58 +96,60 @@ export const addItemsToVoucher = async (req, res) => {
         const { items } = req.body; // Get new items from the request body
 
         // Validate items array
-        if (!Array.isArray(items) || items.length === 0) {
-            return res.status(400).json({ message: "Items must be a non-empty array" });
-        }
+        // if (!Array.isArray(items) || items.length === 0) {
+        //     return res.status(400).json({ message: "Items must be a non-empty array" });
+        // }
 
-        // Find the voucher and ensure it belongs to the given customer
-        const voucher = await Voucher.findOne({ _id: voucherId, customer: customerId });
-        if (!voucher) {
-            return res.status(404).json({ message: "Voucher not found for the given customer" });
-        }
+        // // Find the voucher and ensure it belongs to the given customer
+        // const voucher = await Voucher.findOne({ _id: voucherId, customer: customerId });
+        // if (!voucher) {
+        //     return res.status(404).json({ message: "Voucher not found for the given customer" });
+        // }
 
-        // Extract item IDs from the input
-        const itemIds = items.map((item) => item.item);
+        // // Extract item IDs from the input
+        // const itemIds = items.map((item) => item.item);
 
-        // Fetch the items from the database
-        const existingItems = await Item.find({ _id: { $in: itemIds } });
+        // // Fetch the items from the database
+        // const existingItems = await Item.find({ _id: { $in: itemIds } });
 
-        if (existingItems.length !== itemIds.length) {
-            return res.status(400).json({
-                message: "Some items do not exist in the database",
-            });
-        }
+        // if (existingItems.length !== itemIds.length) {
+        //     return res.status(400).json({
+        //         message: "Some items do not exist in the database",
+        //     });
+        // }
 
-        // Map items with the correct rate and calculate amount
-        voucher.items = items.map((itemInput) => {
-            const itemFromDB = existingItems.find((dbItem) => dbItem._id.toString() === itemInput.item);
+        // // Map items with the correct rate and calculate amount
+        // voucher.items = items.map((itemInput) => {
+        //     const itemFromDB = existingItems.find((dbItem) => dbItem._id.toString() === itemInput.item);
 
-            if (!itemFromDB) {
-                throw new Error(`Item with ID ${itemInput.item} not found`);
-            }
+        //     if (!itemFromDB) {
+        //         throw new Error(`Item with ID ${itemInput.item} not found`);
+        //     }
 
-            const rate = itemFromDB.rate; // Assuming `price` field exists in `Item` schema
-            const amount = itemInput.quantity * rate;
+        //     const rate = itemFromDB.rate; // Assuming `price` field exists in `Item` schema
+        //     const amount = itemInput.quantity * rate;
 
-            return {
-                item: itemInput.item,
-                quantity: itemInput.quantity,
-                rate,
-                amount,
-            };
-        });
+        //     return {
+        //         item: itemInput.item,
+        //         quantity: itemInput.quantity,
+        //         rate,
+        //         amount,
+        //     };
+        // });
 
-        // Calculate the total amount
-        voucher.totalAmount = voucher.items.reduce((sum, item) => sum + item.amount, 0);
+        // // Calculate the total amount
+        // voucher.totalAmount = voucher.items.reduce((sum, item) => sum + item.amount, 0);
 
-        // Save the updated voucher
-        await voucher.save();
+        // // Save the updated voucher
+        // await voucher.save();
 
-        res.status(200).json({
-            success: true,
-            message: "Voucher items updated successfully",
-            voucher,
-        });
+        // res.status(200).json({
+        //     success: true,
+        //     message: "Voucher items updated successfully",
+        //     voucher,
+        // });
+
+        console.log(items);
     } catch (error) {
         console.error("Error updating voucher items:", error);
         res.status(500).json({

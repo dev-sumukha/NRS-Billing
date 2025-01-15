@@ -17,8 +17,7 @@ const voucherSchema = new mongoose.Schema(
         items: [
             {
                 item: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "Item",
+                    type: String,
                     required: true,
                     trim: true
                 },

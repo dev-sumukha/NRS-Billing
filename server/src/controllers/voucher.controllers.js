@@ -51,6 +51,7 @@ export const updateVoucher = async (req,res) => {
     try {
         const { voucherId } = req.params;
         const { items } = req.body;
+        console.log(items);
 
         const voucher = await Voucher.findById({_id:voucherId});
 
