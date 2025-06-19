@@ -21,4 +21,8 @@ app.use("/api/items",itemRoutes);
 app.use("/api/customer",customerRoutes);
 app.use("/api/customer/voucher",voucherRoutes);
 
+app.get("/",(req,res) => {
+    res.send("Hi")
+})
+
 export default app;
