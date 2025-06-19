@@ -154,7 +154,7 @@ function VoucherPage() {
   useEffect(() => {
     const fetchVoucherItems = async () => {
       try {
-        const res = await axios.get(`$https://nrs-billing.onrender.com/api/items/customers/${customerId}/vouchers/${voucherId}`, {
+        const res = await axios.get(`https://nrs-billing.onrender.com/api/items/customers/${customerId}/vouchers/${voucherId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
