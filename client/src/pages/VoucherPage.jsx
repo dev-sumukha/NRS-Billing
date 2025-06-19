@@ -154,15 +154,12 @@ function VoucherPage() {
   useEffect(() => {
     const fetchVoucherItems = async () => {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}api/items/customers/${customerId}/vouchers/${voucherId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axios.get(`$https://nrs-billing.onrender.com/api/items/customers/${customerId}/vouchers/${voucherId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
+
+        console.log(res);
         const fetchedItems = res.data?.voucher?.items || [];
         const restored = fetchedItems.map(item => ({
           itemName: item.item,
