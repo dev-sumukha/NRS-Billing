@@ -33,7 +33,7 @@ function CustomerPage() {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/customer/createCustomer",
+        `${import.meta.env.VITE_BACKEND_URL}/api/customer/createCustomer`,
         newCustomer,
         {
           headers: {
