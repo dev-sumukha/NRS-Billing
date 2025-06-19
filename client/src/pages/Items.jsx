@@ -29,7 +29,7 @@ function ItemPage() {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:3000/api/items/createItem",newItem,{
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}api/items/createItem`,newItem,{
         headers:{
           Authorization: `Bearer ${token}`
         }
