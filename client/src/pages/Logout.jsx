@@ -1,8 +1,16 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
+import userContext from '../store/UserContext'
+import { Navigate } from 'react-router-dom'
 
-const Logout = () => {
+function Logout() {
+  const { LogoutUser } = useContext(userContext)
+  
+  useEffect(()=>{
+    LogoutUser()
+  },[])
+  
   return (
-    <div>Logout</div>
+    <Navigate to="/"/>
   )
 }
 

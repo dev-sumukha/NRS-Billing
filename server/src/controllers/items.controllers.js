@@ -50,113 +50,96 @@ export const deleteItem = async (req, res) => {
 }
 
 export const suggestItemsToVoucher = async (req, res) => {
-    const { query } = req.query; // Ensure frontend sends query in the body
-    console.log("Query received:", req.query);
-    try {
-        const itemList = await Item.find({
-            itemName: { $regex: "^" + query, $options: "i" },
-        }).select("itemName rate caseQuantity company");
-        
-        console.log("Item List:", itemList);
-        res.status(200).json({ success: true, message: "Items List", itemList });
-    } catch (error) {
-        console.error("Error fetching items:", error);
-        res.status(500).json({ success: false, message: "Server Error" });
-    }
+  const { query } = req.body;
+  if (!query) return res.json([]);
+
+  try {
+    const products = await Item.find({
+      itemName: { $regex: query, $options: "i" }
+    });
+
+    console.log(products);
+    
+    res.status(200).json(products);
+  } catch (err) {
+    console.error("❌ Suggestion error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
 };
-
-
-// export const addItemsToVoucher = async (req, res) => {
-//     try {
-//         const { customerId, voucherId } = req.params;
-//         const { items } = req.body; // get the array of items 
-
-//         try {
-//             const voucher = await Voucher.findOne({ _id: voucherId, customer: customerId });
-
-//             if (!voucher) {
-//                 return res.status(404).json({ message: "Voucher not found for the given customer" });
-//             }
-//             voucher.items.push(...items);
-
-//             await voucher.save();
-
-//             res.status(201).json({ success: true, message: "items added to voucher" });
-//         } catch (error) {
-//             console.log("Error ",error);
-//         }
-//     } catch (error) {
-//         console.log("Error ",error);
-//     }
-// }
 
 export const addItemsToVoucher = async (req, res) => {
-    try {
-        const { customerId, voucherId } = req.params; // Extract params
-        const { items } = req.body; // Get new items from the request body
+  try {
+    const { customerId, voucherId } = req.params;
+    const { items } = req.body;
 
-        // Validate items array
-        // if (!Array.isArray(items) || items.length === 0) {
-        //     return res.status(400).json({ message: "Items must be a non-empty array" });
-        // }
+    console.log("Incoming Items Count:", items?.length || 0);
+    console.log(items);
 
-        // // Find the voucher and ensure it belongs to the given customer
-        // const voucher = await Voucher.findOne({ _id: voucherId, customer: customerId });
-        // if (!voucher) {
-        //     return res.status(404).json({ message: "Voucher not found for the given customer" });
-        // }
-
-        // // Extract item IDs from the input
-        // const itemIds = items.map((item) => item.item);
-
-        // // Fetch the items from the database
-        // const existingItems = await Item.find({ _id: { $in: itemIds } });
-
-        // if (existingItems.length !== itemIds.length) {
-        //     return res.status(400).json({
-        //         message: "Some items do not exist in the database",
-        //     });
-        // }
-
-        // // Map items with the correct rate and calculate amount
-        // voucher.items = items.map((itemInput) => {
-        //     const itemFromDB = existingItems.find((dbItem) => dbItem._id.toString() === itemInput.item);
-
-        //     if (!itemFromDB) {
-        //         throw new Error(`Item with ID ${itemInput.item} not found`);
-        //     }
-
-        //     const rate = itemFromDB.rate; // Assuming `price` field exists in `Item` schema
-        //     const amount = itemInput.quantity * rate;
-
-        //     return {
-        //         item: itemInput.item,
-        //         quantity: itemInput.quantity,
-        //         rate,
-        //         amount,
-        //     };
-        // });
-
-        // // Calculate the total amount
-        // voucher.totalAmount = voucher.items.reduce((sum, item) => sum + item.amount, 0);
-
-        // // Save the updated voucher
-        // await voucher.save();
-
-        // res.status(200).json({
-        //     success: true,
-        //     message: "Voucher items updated successfully",
-        //     voucher,
-        // });
-
-        console.log(items);
-    } catch (error) {
-        console.error("Error updating voucher items:", error);
-        res.status(500).json({
-            message: "Internal server error",
-            error: error.message,
-        });
+    // Validation
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "Items must be a non-empty array" });
     }
+
+    for (const item of items) {
+      if (
+        !item.item ||
+        !item.companyName ||
+        typeof item.qty !== "number" ||
+        typeof item.rate !== "number" ||
+        typeof item.amount !== "number"
+      ) {
+        return res.status(400).json({ message: "Invalid item structure" });
+      }
+    }
+
+    // Calculate new total
+    const newTotal = items.reduce((sum, i) => sum + i.amount, 0);
+
+    // Update: REPLACE items array and totalAmount
+    const updated = await Voucher.findOneAndUpdate(
+      { _id: voucherId, customer: customerId },
+      {
+        $set: {
+          items: items,
+          totalAmount: newTotal,
+          updatedAt: new Date()
+        }
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Voucher not found for this customer" });
+    }
+
+    res.status(200).json({
+      message: "Items replaced successfully",
+      totalItems: items.length,
+      newTotalAmount: newTotal,
+      voucher: updated
+    });
+
+  } catch (error) {
+    console.error("Error replacing items in voucher:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message
+    });
+  }
 };
 
-// use effect, memo -> 
+
+export const getVoucherDetails = async (req, res) => {
+  try {
+    const { customerId, voucherId } = req.params;
+    const voucher = await Voucher.findOne({ _id: voucherId, customer: customerId });
+
+    if (!voucher) {
+      return res.status(404).json({ message: "Voucher not found" });
+    }
+    console.log(voucher);
+    res.status(200).json({ voucher });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+};

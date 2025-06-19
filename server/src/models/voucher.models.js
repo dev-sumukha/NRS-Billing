@@ -21,7 +21,12 @@ const voucherSchema = new mongoose.Schema(
                     required: true,
                     trim: true
                 },
-                quantity: {
+                companyName:{
+                    type: String,
+                    required: true,
+                    trim: true
+                },
+                qty: {
                     type: Number,
                     required: true,
                     trim: true

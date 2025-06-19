@@ -1,35 +1,77 @@
-// App.js
 import React from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
-import Customers from "./pages/Customer";
-import Vouchers from "./pages/Vouchers";
 import Login from "./pages/Login";
-import Dashboard from "./components/Dashboard";
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Layout from "./components/Layout";
+import Customer from "./pages/CustomerPage";
+import Items from "./pages/Items";
+import Profile from "./pages/Profile";
+import ProtectedRoute from "./ProtectedRoute";
+import Logout from "./pages/Logout";
+import CustomerVouchers from "./pages/CustomerVouchers";
+import VoucherPage from "./pages/VoucherPage"
 
-const App = () => {
-  const location = useLocation()
-  const isLoginPage = location.pathname === "/login-logout"
-
+function App() {
   return (
     <>
-        <div className="flex min-h-screen bg-gray-50">
-          {/* Conditionally render the Navbar */}
-          {!isLoginPage && <Navbar />}
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/logout" element={<Logout />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route
+            path="/dashboard/customers"
+            element={
+              <ProtectedRoute>
+                <Customer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/customers/voucher/getVouchers/:customerId"
+            element={
+              <ProtectedRoute>
+                <CustomerVouchers />
+              </ProtectedRoute>
+            }
+          ></Route>
+          <Route 
+            path="/dashboard/customers/:customerId/vouchers/:voucherId/addItems"
+            element={
+              <ProtectedRoute>
+                <VoucherPage />
+              </ProtectedRoute>
+            }
+          >
 
-          {/* Main Content */}
-          <main className="flex-1 p-6">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/vouchers" element={<Vouchers />} />
-              <Route path="/login-logout" element={<Login />} />
-            </Routes>
-          </main>
-        </div>
+          </Route>
+          <Route
+            path="/dashboard/items"
+            element={
+              <ProtectedRoute>
+                <Items />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+      </Routes>
     </>
   );
-};
+}
 
 export default App;
