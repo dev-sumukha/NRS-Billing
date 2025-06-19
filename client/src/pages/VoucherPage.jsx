@@ -32,7 +32,7 @@ function VoucherPage() {
 
   const fetchSuggestions = debounce(async (query) => {
     try {
-      const res = await axios.post(`http://localhost:3000/api/items/suggestItems`, { query }, {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}api/items/suggestItems`, { query }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSuggestions(res.data);
@@ -134,7 +134,7 @@ function VoucherPage() {
       };
 
       const res = await axios.put(
-        `http://localhost:3000/api/items/customers/${customerId}/vouchers/${voucherId}/addItems`,
+        `${import.meta.env.VITE_BACKEND_URL}api/items/customers/${customerId}/vouchers/${voucherId}/addItems`,
         payload,
         {
           headers: {

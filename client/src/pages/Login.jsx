@@ -22,7 +22,7 @@ function Login() {
       setError('Please fill in both fields');
     } else {
       try {
-        const res = await axios.post("https://nrs-billing.onrender.com/api/auth/login",user)
+        const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}api/auth/login`,user)
         if(res){ 
           storeTokenInLS(res.data.token)
           alert("Logged In")

@@ -69,7 +69,7 @@ function CustomerPage() {
   const handleDelete = async (customerId) => {
     try {
       await axios.delete(
-        `http://localhost:3000/api/customer/deleteCustomer/${customerId}`,
+        `$${import.meta.env.VITE_BACKEND_URL}api/customer/deleteCustomer/${customerId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -87,7 +87,7 @@ function CustomerPage() {
     setLoading(true);
     try {
       const res = await axios.get(
-        "http://localhost:3000/api/customer/getCustomers",
+        `${import.meta.env.VITE_BACKEND_URL}api/customer/getCustomers`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

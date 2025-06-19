@@ -14,7 +14,7 @@ function CustomerVouchers() {
 
     try {
       const res = await axios.post(
-        `http://localhost:3000/api/customer/voucher/createVoucher/${customerId}`
+        `${import.meta.env.VITE_BACKEND_URL}api/customer/voucher/createVoucher/${customerId}`
       );
 
       const newVoucher = res.data.voucher;
@@ -38,7 +38,7 @@ const handleAddItem = (voucherId) => {
     const getVoucherList = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/customer/voucher/getVouchers/${customerId}`
+          `${import.meta.env.VITE_BACKEND_URL}api/customer/voucher/getVouchers/${customerId}`
         );
         setCustomerDetails(res.data.customerDetails);
         setVoucherList(res.data.customerVoucherList.vouchers || []);
