@@ -155,7 +155,7 @@ function VoucherPage() {
     const fetchVoucherItems = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/items/customers/${customerId}/vouchers/${voucherId}`,
+          `${import.meta.env.VITE_BACKEND_URL}api/items/customers/${customerId}/vouchers/${voucherId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
