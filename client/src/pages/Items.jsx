@@ -60,7 +60,7 @@ function ItemPage() {
     try {
       setItems((prevItems) => prevItems.filter((i) => i._id !== id));
       const res = await axios.delete(
-        `http://localhost:3000/api/items/deleteItem/${id}`,
+        `${import.meta.env.VITE_BACKEND_URL}api/items/deleteItem/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (err) {
@@ -72,7 +72,7 @@ function ItemPage() {
     setLoading(true);
     try {
       const res = await axios.get(
-        "http://localhost:3000/api/items/getItems",
+        `${import.meta.env.VITE_BACKEND_URL}api/items/getItems`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setItems(res.data.itemsList);
